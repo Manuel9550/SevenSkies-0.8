@@ -70,6 +70,7 @@ public:
 	sf::Clock getCannonsL();
 	sf::Vector2f getCannonDirection(char side, int cannonNumber);
 	sf::Vector2f getCannonPoints(int side, int cannonNumber);
+	int getNumCannons();
 	
 
 	ship(float width, float length, sf::Texture & shipTexture, int x, int y, int newId, int cannonNumber);
@@ -90,6 +91,7 @@ public:
 	sf::Vector2f perpAxis(sf::Vector2f Axis);
 	void getAxes(sf::Vector2f AxesArray[numSides]);
 	float getOverlap(pair<float, float> s1, pair <float, float> s2);
+	
 
 	
 	void CannonReset(int side);

@@ -19,7 +19,7 @@ int main()
 
 	sf::Clock clock;
 	sf::Time gameRun;
-	sf::RenderWindow window(sf::VideoMode(1200, 1000), "SFML works!");
+	sf::RenderWindow window(sf::VideoMode(1200, 1000), "Seven Skies!");
 	sf::Texture Texture;
 	Texture.loadFromFile("textures/wood1.jpg");
 
@@ -27,10 +27,10 @@ int main()
 	vector<projectile> currentProjectiles;
 	//vector<shared_ptr<ship>> currentShips;
 	vector<ship> currentShips;
-	ship player(50, 150, Texture, 0, 0, 1, 5);
-	ship enemy(75, 300, Texture, -200, 0, 2, 5);
+	ship player(50, 150, Texture, 0, 0, 1, 8);
+	ship enemy(75, 300, Texture, -200, 0, 2, 10);
 	currentShips.push_back(enemy);
-	ship enemy2(50, 100, Texture, 800, 500, 3, 5);
+	ship enemy2(50, 100, Texture, 800, 500, 3, 3);
 	currentShips.push_back(enemy2);
 	
 

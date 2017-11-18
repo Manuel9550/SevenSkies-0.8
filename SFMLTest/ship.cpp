@@ -108,8 +108,8 @@ sf::Vector2f ship::getCannonPoints(int side, int cannonNumber)
 		sf::Vector2f offset = (getHull()->getTransform().transformPoint(getHull()->getPoint(0)) - getHull()->getTransform().transformPoint(getHull()->getPoint(6)));
 		// we then divide this distance by the number of cannons the ship posseses, since the cannons are evenly spaced
 		
-		offset.x = offset.x / 5;
-		offset.y = offset.y / 5;
+		offset.x = offset.x / getNumCannons();
+		offset.y = offset.y / getNumCannons();
 
 
 		// to get the final position of the chosen cannon, we multiply the offset by the chosen cannons Number. 
@@ -120,13 +120,18 @@ sf::Vector2f ship::getCannonPoints(int side, int cannonNumber)
 	{
 		
 		sf::Vector2f offset = (getHull()->getTransform().transformPoint(getHull()->getPoint(2)) - getHull()->getTransform().transformPoint(getHull()->getPoint(3)));
-		offset.x = offset.x / 5;
-		offset.y = offset.y / 5;
+		offset.x = offset.x / getNumCannons();
+		offset.y = offset.y / getNumCannons();
 
 		point = getHull()->getTransform().transformPoint(getHull()->getPoint(0)) - sf::Vector2f(offset.x * cannonNumber, offset.y * cannonNumber);
 		
 	}
 	return point;
+}
+
+int ship::getNumCannons()
+{
+	return numCannons;
 }
 
 /**
@@ -185,6 +190,8 @@ ship::ship(const ship & obj)
 	leftSideCannons = obj.leftSideCannons;
 	shipLength = obj.shipLength;
 	currentVelocity = obj.currentVelocity;
+
+	numCannons = obj.numCannons;
 }
 
 /**
@@ -213,6 +220,7 @@ ship & ship::operator=(const ship & rhs)
 	std::swap(currentVelocity, tmp.currentVelocity);
 	std::swap(HP, tmp.HP);
 	std::swap(id, tmp.id);
+	std::swap(numCannons, tmp.numCannons);
 	return *this;
 
 }
@@ -891,7 +899,7 @@ void ship::fireCannons(char side, vector<projectile>& currentCannonBalls)
 		}
 		else
 		{
-			for (int i = 0; i < 5; i++)
+			for (int i = 0; i < getNumCannons(); i++)
 			{
 				projectile currentCannonball(getCannonDirection(side, i) + getCurrentVelocity(), getCannonPoints(cannonSideInt, i), 1000, 0.01, getID());
 				currentCannonBalls.push_back(currentCannonball);
