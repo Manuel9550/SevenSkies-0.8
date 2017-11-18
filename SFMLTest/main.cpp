@@ -16,7 +16,6 @@ void getInput(ship & player, vector<projectile> & currentProjectiles);
 
 int main()
 {
-	int dummy = 0;
 
 	sf::Clock clock;
 	sf::Time gameRun;
@@ -26,16 +25,15 @@ int main()
 
 	vector<ExplosionSimple> currentExplosions; 
 	vector<projectile> currentProjectiles;
-	//vector<shared_ptr<ship>> currentShips;
+	
 	vector<ship> currentShips;
-	ship player(50, 150, Texture, 0, 0, 1, 8);
+	ship player(50, 150, Texture, 0, 0, 1, 6);
 	ship enemy(75, 300, Texture, -200, 0, 2, 10);
 	currentShips.push_back(enemy);
 	ship enemy2(50, 100, Texture, 800, 500, 3, 3);
 	currentShips.push_back(enemy2);
 	
 
-	//sf::View view(sf::Vector2f(0.0f,0.0f), sf::Vector2f(1000.0f,1000.0f));
 	sf::View view;
 	view.setSize(1000, 1000);
 	view.setViewport(sf::FloatRect(0,0,0.8,1));
@@ -64,106 +62,18 @@ int main()
 				break;
 			}
 		}
-
+		// get the current input from the player
 		getInput(player, currentProjectiles);
-		/*if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
-		{
-			player.getHull()->rotate((float)-0.03);
-		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
-		{
-			player.SpeedChange(1);
-		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
-		{
-			player.SpeedChange(-1);
-		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
-		{
-			player.getHull()->rotate((float) 0.03);
-		}
 		
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::K))
-		{
-			player.fireCannons('l', currentProjectiles);
-		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::L))
-		{
-			player.fireCannons('r', currentProjectiles);
-		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::O))
-		{
-			player.fireCannons('o', currentProjectiles);
-		}*/
-		
-		/*
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::K))
-		{
-			sf::Time cannonTimer = player.getCannonsL().getElapsedTime();
-			if (cannonTimer.asSeconds() > 5)
-			{
-				player.CannonReset(0);
-
-				// push the new cannonballs onto the list 
-				for (int i = 0; i < 5; i++)
-				{
-					projectile currentCannonball(player.getCannonDirection('l', i) + player.getCurrentVelocity(), player.getCannonPoints(1, i), 1000, 0.01);
-					currentProjectiles.push_back(currentCannonball);
-				}
-			}
-		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::L))
-		{
-			sf::Time cannonTimer = player.getCannonsR().getElapsedTime();
-			if (cannonTimer.asSeconds() > 5)
-			{
-				// reset the timer
-				player.CannonReset(1);
-
-				
-				// push the new cannonballs onto the list 
-				for (int i = 0; i < 5; i++)
-				{
-					projectile currentCannonball(player.getCannonDirection('r', i) + player.getCurrentVelocity(), player.getCannonPoints(0, i), 1000, 0.01);
-					currentProjectiles.push_back(currentCannonball);
-				}
-			}
-		}
-		*/
-		/*
-		if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
-		{
-			sf::Vector2i mousePos = sf::Mouse::getPosition(window);
-			player.setPosition((float)mousePos.x, (float)mousePos.y);
-		}
-		*/
 		
 		window.clear(sf::Color::Cyan);
 		view.setCenter(player.getHull()->getPosition());
-		/*
-		if (player.isInRange(&enemy))
-		{
-			if (player.isColliding(&enemy))
-			{
-				player.getHull()->setOutlineColor(sf::Color::Red);
-			}
-			else
-			{
-				player.getHull()->setOutlineColor(sf::Color::White);
-			}
-		}
-		*/
-		dummy++;
-	
-		if (dummy >= 1000)
-		{
 		
-			dummy = 0;
-		}
-		
+		// check for collision between the ships and the player
 		for (vector<ship>::iterator c = currentShips.begin(); c != currentShips.end(); c++)
 		{
 			
+			// updating the AI, and then checking if the ship hits the player
 			c->updateAI(0);
 			if (player.isInRange(&*c))
 			{
@@ -173,48 +83,49 @@ int main()
 					player.getHull()->setOutlineColor(sf::Color::Red);
 					player.SpeedChange(-3);
 					player.setHP(player.getHP() - 1);
+					c->setHP(c->getHP() - 1);
 				}
 				else
 				{
 					player.getHull()->setOutlineColor(sf::Color::White);
 
 				}
+			}
+
+			// now see if the ship collides with any other ship in the game
+			for (vector<ship>::iterator ship = currentShips.begin(); ship != currentShips.end(); ship++)
+			{
+				// first, make sure that the ship isn't being compared against itself
+				if ( c->getID() != ship->getID())
+				{
+					if (c->isInRange(&*ship))
+					{
+						// check to see if the ship is colliding
+						if (c->shipCollision(&*ship))
+						{
+							c->getHull()->setOutlineColor(sf::Color::Red);
+							c->SpeedChange(-3);
+							c->setHP(c->getHP() - 1);
+							ship->setHP(ship->getHP() - 1);
+						}
+						else
+						{
+							c->getHull()->setOutlineColor(sf::Color::Yellow);
+
+						}
+					}
+				}
+
 			}
 
 
 		}
 		
-		/*
-		for (vector<ship>::iterator c = currentShips.begin(); c != currentShips.end(); c++)
-		{
-
-			c->updateAI(0);
-			if (player.isInRange(&*c))
-			{
-
-				if (collide(& player, &*c))
-				{
-					player.getHull()->setOutlineColor(sf::Color::Red);
-					// we attempt to move the first ship away from the other ship
-					//sf::Vector2f moveAway(player.getHull()->getPosition().x - c->getHull()->getPosition().x, player.getHull()->getPosition().y - c->getHull()->getPosition().y);
-					//player.getHull->move(-minAxis.x, -minAxis.y);
-					player.getHull()->setOutlineColor(sf::Color::Red);
-				}
-				else
-				{
-					system("CLS");
-					player.getHull()->setOutlineColor(sf::Color::White);
-				}
-			}
-			
-
-		}
-		*/
+		
 		//updating the ships
 
 		player.upDate();
-		//enemy.upDate(1);
-		//enemy2.upDate(-3);
+		
 		
 		// now rotate the ships
 		for (vector<ship>::iterator c = currentShips.begin(); c != currentShips.end(); c++)
