@@ -37,8 +37,8 @@ projectile::projectile(sf::Vector2f direction, sf::Vector2f startPoint, float ra
 	cannonBall->setFillColor(sf::Color::Black);
 	*/
 
-	sf::CircleShape * newCannonBall = new sf::CircleShape(5);
-	newCannonBall->setOrigin(2.5, 2.5);
+	sf::CircleShape * newCannonBall = new sf::CircleShape(4);
+	newCannonBall->setOrigin(2, 2);
 	newCannonBall->setPosition(startPoint);
 	newCannonBall->setFillColor(sf::Color::Black);
 	cannonBall = newCannonBall;
@@ -47,10 +47,10 @@ projectile::projectile(sf::Vector2f direction, sf::Vector2f startPoint, float ra
 	newCannonHitBox->setPointCount(4);
 	newCannonHitBox->setPosition(startPoint);
 	newCannonHitBox->setOrigin(startPoint.x - 2, startPoint.y - 2);
-	newCannonHitBox->setPoint(0, sf::Vector2f(startPoint.x - 4, startPoint.y - 4));
-	newCannonHitBox->setPoint(1, sf::Vector2f(startPoint.x + 4, startPoint.y - 4));
-	newCannonHitBox->setPoint(2, sf::Vector2f(startPoint.x + 4, startPoint.y + 4));
-	newCannonHitBox->setPoint(3, sf::Vector2f(startPoint.x - 4, startPoint.y + 4));
+	newCannonHitBox->setPoint(0, sf::Vector2f(startPoint.x - 3, startPoint.y - 3));
+	newCannonHitBox->setPoint(1, sf::Vector2f(startPoint.x + 3, startPoint.y - 3));
+	newCannonHitBox->setPoint(2, sf::Vector2f(startPoint.x + 3, startPoint.y + 3));
+	newCannonHitBox->setPoint(3, sf::Vector2f(startPoint.x - 3, startPoint.y + 3));
 
 	cannonHitBox = newCannonHitBox;
 	done = false;

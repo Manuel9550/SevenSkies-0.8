@@ -12,6 +12,7 @@
 using namespace std;
 
 void drawHUD(sf::RenderWindow * display, float time1, float time2, int HP);
+void getInput(ship & player, vector<projectile> & currentProjectiles);
 
 int main()
 {
@@ -63,7 +64,9 @@ int main()
 				break;
 			}
 		}
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
+
+		getInput(player, currentProjectiles);
+		/*if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
 		{
 			player.getHull()->rotate((float)-0.03);
 		}
@@ -91,7 +94,7 @@ int main()
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::O))
 		{
 			player.fireCannons('o', currentProjectiles);
-		}
+		}*/
 		
 		/*
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::K))
@@ -395,4 +398,44 @@ void drawHUD(sf::RenderWindow * display, float time1, float time2, int HP)
 
 	
 
+}
+
+void getInput(ship & player, vector<projectile> & currentProjectiles)
+{
+	
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::A))
+	{
+		player.getHull()->rotate((float)-0.03);
+	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::W))
+	{
+		player.SpeedChange(1);
+	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::S))
+	{
+		player.SpeedChange(-1);
+	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::D))
+	{
+		player.getHull()->rotate((float) 0.03);
+	}
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::K))
+	{
+		player.fireCannons('l', currentProjectiles);
+	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::L))
+	{
+		player.fireCannons('r', currentProjectiles);
+	}
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Key::O))
+	{
+		player.fireCannons('o', currentProjectiles);
+	}
+
+
+
+
+	
 }
