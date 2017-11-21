@@ -13,6 +13,9 @@ using namespace std;
 
 void drawHUD(sf::RenderWindow * display, float time1, float time2, int HP);
 void getInput(ship & player, vector<projectile> & currentProjectiles);
+void collisionCheck(ship & player, vector<ship> & currentShips);
+void updateInGameEntities(ship & player, vector<ship> & currentShips, vector<projectile> & currentProjectiles, vector<ExplosionSimple> & currentExplosions);
+void DrawGameEntities(ship & player, vector<ship> & currentShips, vector<projectile> & currentProjectiles, vector<ExplosionSimple> & currentExplosions, sf::RenderWindow & window);
 
 int main()
 {
@@ -65,182 +68,32 @@ int main()
 		// get the current input from the player
 		getInput(player, currentProjectiles);
 		
-		
+		// making the background of the window cyan 
 		window.clear(sf::Color::Cyan);
 		view.setCenter(player.getHull()->getPosition());
 		
 		// check for collision between the ships and the player
-		for (vector<ship>::iterator c = currentShips.begin(); c != currentShips.end(); c++)
-		{
-			
-			// updating the AI, and then checking if the ship hits the player
-			c->updateAI(0);
-			if (player.isInRange(&*c))
-			{
-				
-				if (player.shipCollision(&*c))
-				{
-					player.getHull()->setOutlineColor(sf::Color::Red);
-					player.SpeedChange(-3);
-					player.setHP(player.getHP() - 1);
-					c->setHP(c->getHP() - 1);
-				}
-				else
-				{
-					player.getHull()->setOutlineColor(sf::Color::White);
-
-				}
-			}
-
-			// now see if the ship collides with any other ship in the game
-			for (vector<ship>::iterator ship = currentShips.begin(); ship != currentShips.end(); ship++)
-			{
-				// first, make sure that the ship isn't being compared against itself
-				if ( c->getID() != ship->getID())
-				{
-					if (c->isInRange(&*ship))
-					{
-						// check to see if the ship is colliding
-						if (c->shipCollision(&*ship))
-						{
-							c->getHull()->setOutlineColor(sf::Color::Red);
-							c->SpeedChange(-3);
-							c->setHP(c->getHP() - 1);
-							ship->setHP(ship->getHP() - 1);
-						}
-						else
-						{
-							c->getHull()->setOutlineColor(sf::Color::Yellow);
-
-						}
-					}
-				}
-
-			}
-
-
-		}
-		
+		collisionCheck(player, currentShips);
 		
 		//updating the ships
 
 		player.upDate();
-		
-		
-		// now rotate the ships
-		for (vector<ship>::iterator c = currentShips.begin(); c != currentShips.end(); c++)
-		{
-			c->moveTowards(&player, currentProjectiles);
-		}
-	
-
-
-		// updating the projectiles
-		
-		for (vector<projectile>::iterator c = currentProjectiles.begin(); c != currentProjectiles.end();)
-		{
-			c->update();
-			
-			//check to see if the cannonball has hit any ship
-			for (vector<ship>::iterator s = currentShips.begin(); s != currentShips.end(); s++)
-			{
-				if (c->collisionShipTest(&*s) && (c->getID() != s->getID()))
-				{
-					cout << "hit!\n";
-					s->setHP(s->getHP() - 5);
-					cout << c->getCannonBall()->getPosition().x << " " << c->getCannonBall()->getPosition().y;
-					c->setDone(true);
-					currentExplosions.push_back(ExplosionSimple(100, 6, c->getCannonBall()->getPosition()));
-
-				}
-			}
-			
-			// check to see if it hit the player
-			if (c->collisionShipTest(&player) && (c->getID() != player.getID()))
-			{
-				cout << "hit!\n";
-				player.setHP(player.getHP() - 5);
-				cout << c->getCannonBall()->getPosition().x << " " << c->getCannonBall()->getPosition().y;
-				c->setDone(true);
-				currentExplosions.push_back(ExplosionSimple(100, 6, c->getCannonBall()->getPosition()));
-
-			}
-
-			// also see if the cannonball has passed it's maximum range
-			if (c->passedRange() == true || c->getDone() == true)
-			{
-				c = currentProjectiles.erase(c);
-			}
-			else
-			{
-				++c;
-			}
-		}
-		
-		
 
 	
+		// update the in game objects
+		updateInGameEntities(player, currentShips, currentProjectiles, currentExplosions);
+	
+		// get the in game time to verify if the cannons are ready to fire or not
 		gameRun = clock.getElapsedTime();
-
 		sf::Time leftCannon = player.getCannonsL().getElapsedTime();
 		sf::Time rightCannon = player.getCannonsR().getElapsedTime();
 		
 
 		window.setView(view);
-		window.draw(* player.getHull());
-		//window.draw(* enemy.getHull());
-		//window.draw(* enemy2.getHull());
 
+		// draw the game entities onto the screen
+		DrawGameEntities(player, currentShips, currentProjectiles, currentExplosions, window);
 		
-
-		for (vector<ship>::iterator c = currentShips.begin(); c != currentShips.end();)
-		{
-			window.draw(* c->getHull());
-
-			if (c->getHP() <= 0)
-			{
-				currentExplosions.push_back(ExplosionSimple(500, 50, sf::Vector2f(c->getHull()->getPosition().x - 15, c->getHull()->getPosition().y + 15)));
-				currentExplosions.push_back(ExplosionSimple(500, 15, sf::Vector2f(c->getHull()->getPosition().x, c->getHull()->getPosition().y)));
-				currentExplosions.push_back(ExplosionSimple(500, 30, sf::Vector2f(c->getHull()->getPosition().x - 50, c->getHull()->getPosition().y + 50)));
-				currentExplosions.push_back(ExplosionSimple(500, 40, sf::Vector2f(c->getHull()->getPosition().x + 40, c->getHull()->getPosition().y - 50)));
-				currentExplosions.push_back(ExplosionSimple(500, 25, sf::Vector2f(c->getHull()->getPosition().x - 50, c->getHull()->getPosition().y - 50)));
-				currentExplosions.push_back(ExplosionSimple(500, 25, sf::Vector2f(c->getHull()->getPosition().x + 10, c->getHull()->getPosition().y + 20)));
-				c = currentShips.erase(c);
-
-			}
-			else
-			{
-				++c;
-			}
-		}
-
-		// drawing the cannonballs
-		for (vector<projectile>::iterator c = currentProjectiles.begin(); c != currentProjectiles.end(); c++)
-		{
-			
-			window.draw(*c->getCannonBall());
-		}
-
-		// drawing the explosions
-		for (vector<ExplosionSimple>::iterator c = currentExplosions.begin(); c != currentExplosions.end();)
-		{
-
-			window.draw(*c->getRed());
-			window.draw(*c->getYellow());
-			window.draw(*c->getOrange());
-
-
-			// see if the explosion is done and should be removed from the vector
-
-			if (c->getTimer() > c->getTimeLimit())
-			{
-				c = currentExplosions.erase(c);
-			}
-			else
-			{
-				++c;
-			}
-		}
 		//now we draw the hud
 		window.setView(HUD);
 		drawHUD(&window, leftCannon.asMilliseconds(), rightCannon.asMilliseconds(), player.getHP());
@@ -344,9 +197,168 @@ void getInput(ship & player, vector<projectile> & currentProjectiles)
 	{
 		player.fireCannons('o', currentProjectiles);
 	}
+}
+
+void collisionCheck(ship & player, vector<ship> & currentShips)
+{
+	// check for collision between the ships and the player
+	for (vector<ship>::iterator c = currentShips.begin(); c != currentShips.end(); c++)
+	{
+
+		// updating the AI, and then checking if the ship hits the player
+		c->updateAI(0);
+		if (player.isInRange(&*c))
+		{
+
+			if (player.shipCollision(&*c))
+			{
+				player.getHull()->setOutlineColor(sf::Color::Red);
+				player.SpeedChange(-3);
+				player.setHP(player.getHP() - 1);
+				c->setHP(c->getHP() - 1);
+			}
+			else
+			{
+				player.getHull()->setOutlineColor(sf::Color::White);
+
+			}
+		}
+
+		// now see if the ship collides with any other ship in the game
+		for (vector<ship>::iterator ship = currentShips.begin(); ship != currentShips.end(); ship++)
+		{
+			// first, make sure that the ship isn't being compared against itself
+			if (c->getID() != ship->getID())
+			{
+				if (c->isInRange(&*ship))
+				{
+					// check to see if the ship is colliding
+					if (c->shipCollision(&*ship))
+					{
+						c->getHull()->setOutlineColor(sf::Color::Red);
+						c->SpeedChange(-3);
+						c->setHP(c->getHP() - 1);
+						ship->setHP(ship->getHP() - 1);
+					}
+					else
+					{
+						c->getHull()->setOutlineColor(sf::Color::Yellow);
+
+					}
+				}
+			}
+
+		}
+	}
+}
+
+void updateInGameEntities(ship & player, vector<ship> & currentShips, vector<projectile> & currentProjectiles, vector<ExplosionSimple> & currentExplosions)
+{
+	// now rotate the ships
+	for (vector<ship>::iterator c = currentShips.begin(); c != currentShips.end(); c++)
+	{
+		c->moveTowards(&player, currentProjectiles);
+	}
 
 
 
+	// updating the projectiles
 
-	
+	for (vector<projectile>::iterator c = currentProjectiles.begin(); c != currentProjectiles.end();)
+	{
+		c->update();
+
+		//check to see if the cannonball has hit any ship
+		for (vector<ship>::iterator s = currentShips.begin(); s != currentShips.end(); s++)
+		{
+			if (c->collisionShipTest(&*s) && (c->getID() != s->getID()))
+			{
+				cout << "hit!\n";
+				s->setHP(s->getHP() - 5);
+				cout << c->getCannonBall()->getPosition().x << " " << c->getCannonBall()->getPosition().y;
+				c->setDone(true);
+				currentExplosions.push_back(ExplosionSimple(100, 6, c->getCannonBall()->getPosition()));
+
+			}
+		}
+
+		// check to see if it hit the player
+		if (c->collisionShipTest(&player) && (c->getID() != player.getID()))
+		{
+			cout << "hit!\n";
+			player.setHP(player.getHP() - 5);
+			cout << c->getCannonBall()->getPosition().x << " " << c->getCannonBall()->getPosition().y;
+			c->setDone(true);
+			currentExplosions.push_back(ExplosionSimple(100, 6, c->getCannonBall()->getPosition()));
+
+		}
+
+		// also see if the cannonball has passed it's maximum range
+		if (c->passedRange() == true || c->getDone() == true)
+		{
+			c = currentProjectiles.erase(c);
+		}
+		else
+		{
+			++c;
+		}
+	}
+}
+
+void DrawGameEntities(ship & player, vector<ship> & currentShips, vector<projectile> & currentProjectiles, vector<ExplosionSimple> & currentExplosions, sf::RenderWindow & window)
+{
+	window.draw(*player.getHull());
+	//window.draw(* enemy.getHull());
+	//window.draw(* enemy2.getHull());
+
+
+
+	for (vector<ship>::iterator c = currentShips.begin(); c != currentShips.end();)
+	{
+		window.draw(*c->getHull());
+
+		if (c->getHP() <= 0)
+		{
+			currentExplosions.push_back(ExplosionSimple(500, 50, sf::Vector2f(c->getHull()->getPosition().x - 15, c->getHull()->getPosition().y + 15)));
+			currentExplosions.push_back(ExplosionSimple(500, 15, sf::Vector2f(c->getHull()->getPosition().x, c->getHull()->getPosition().y)));
+			currentExplosions.push_back(ExplosionSimple(500, 30, sf::Vector2f(c->getHull()->getPosition().x - 50, c->getHull()->getPosition().y + 50)));
+			currentExplosions.push_back(ExplosionSimple(500, 40, sf::Vector2f(c->getHull()->getPosition().x + 40, c->getHull()->getPosition().y - 50)));
+			currentExplosions.push_back(ExplosionSimple(500, 25, sf::Vector2f(c->getHull()->getPosition().x - 50, c->getHull()->getPosition().y - 50)));
+			currentExplosions.push_back(ExplosionSimple(500, 25, sf::Vector2f(c->getHull()->getPosition().x + 10, c->getHull()->getPosition().y + 20)));
+			c = currentShips.erase(c);
+
+		}
+		else
+		{
+			++c;
+		}
+	}
+
+	// drawing the cannonballs
+	for (vector<projectile>::iterator c = currentProjectiles.begin(); c != currentProjectiles.end(); c++)
+	{
+
+		window.draw(*c->getCannonBall());
+	}
+
+	// drawing the explosions
+	for (vector<ExplosionSimple>::iterator c = currentExplosions.begin(); c != currentExplosions.end();)
+	{
+
+		window.draw(*c->getRed());
+		window.draw(*c->getYellow());
+		window.draw(*c->getOrange());
+
+
+		// see if the explosion is done and should be removed from the vector
+
+		if (c->getTimer() > c->getTimeLimit())
+		{
+			c = currentExplosions.erase(c);
+		}
+		else
+		{
+			++c;
+		}
+	}
 }
